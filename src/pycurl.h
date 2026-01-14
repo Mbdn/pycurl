@@ -34,6 +34,9 @@
 //#include <curl/easy.h>
 //#include <curl/multi.h>
 #undef NDEBUG
+#include "/home/ladin/Code/curl-impersonate/build/curl-8.1.1/include/curl/curl.h"
+#include "/home/ladin/Code/curl-impersonate/build/curl-8.1.1/include/curl/easy.h"
+#include "/home/ladin/Code/curl-impersonate/build/curl-8.1.1/include/curl/multi.h"
 #include <assert.h>
 
 #define MAKE_LIBCURL_VERSION(major, minor, patch) \
