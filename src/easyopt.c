@@ -143,6 +143,7 @@ util_curl_unsetopt(CurlObject *self, int option)
 #endif
 
     CLEAR_OBJECT(CURLOPT_HTTPHEADER, self->httpheader);
+    CLEAR_OBJECT(CURLOPT_HTTPBASEHEADER, self->httpheader);
 #if LIBCURL_VERSION_NUM >= MAKE_LIBCURL_VERSION(7, 37, 0)
     CLEAR_OBJECT(CURLOPT_PROXYHEADER, self->proxyheader);
 #endif
@@ -250,6 +251,9 @@ do_curl_setopt_string_impl(CurlObject *self, int option, PyObject *obj)
     /* Check that the option specified a string as well as the input */
     switch (option) {
     case CURLOPT_CAINFO:
+    case CURLOPT_SSL_CERT_COMPRESSION:
+    case CURLOPT_SSL_SIG_HASH_ALGS:
+    case CURLOPT_HTTP2_PSEUDO_HEADERS_ORDER:
     case CURLOPT_CAPATH:
     case CURLOPT_COOKIE:
     case CURLOPT_COOKIEFILE:
@@ -532,7 +536,7 @@ do_curl_setopt_file_passthrough(CurlObject *self, int option, PyObject *obj)
         PyErr_SetString(PyExc_TypeError, "second argument must be open file");
         return NULL;
     }
-    
+
     switch (option) {
     case CURLOPT_READDATA:
         res = curl_easy_setopt(self->handle, CURLOPT_READFUNCTION, fread);
@@ -823,6 +827,9 @@ do_curl_setopt_list(CurlObject *self, int option, int which, PyObject *obj)
         old_slist_obj = &self->http200aliases;
         break;
     case CURLOPT_HTTPHEADER:
+        old_slist_obj = &self->httpheader;
+        break;
+    case CURLOPT_HTTPBASEHEADER:
         old_slist_obj = &self->httpheader;
         break;
 #if LIBCURL_VERSION_NUM >= MAKE_LIBCURL_VERSION(7, 37, 0)
@@ -1199,7 +1206,7 @@ do_curl_setopt(CurlObject *self, PyObject *args)
     Files in Python 3 are no longer FILE * instances and therefore cannot
     be directly given to curl, therefore this method handles all I/O to
     Python objects.
-    
+
     In Python 2 true file objects are FILE * instances and will be handled
     by stdio passthrough code invoked above, and file-like objects will
     be handled by this method.
